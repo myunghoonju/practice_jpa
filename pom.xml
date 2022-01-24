@@ -13,6 +13,7 @@
         <maven.compiler.target>8</maven.compiler.target>
     </properties>
     <!-- springboot 2.5.9 based setting -->
+    <!--https://docs.spring.io/spring-boot/docs/2.5.9/reference/html/dependency-versions.html#dependency-versions.properties-->
     <dependencies>
         <dependency>
             <groupId>org.hibernate</groupId>
