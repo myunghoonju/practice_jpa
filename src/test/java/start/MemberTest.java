@@ -76,4 +76,47 @@ public class MemberTest {
         }
     }
 
+    @Test
+    public void repeatableReadTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
+            //from db
+            Member member1 = em.find(Member.class, 4L);
+            System.out.println(member1.getName());
+            //from cache
+            Member member2 = em.find(Member.class, 4L);
+            System.out.println(member2.getName());
+            //true
+            System.out.println(member1 == member2);
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
+    @Test
+    public void writeBehindTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
+            Member a = new Member(10L, "a");
+            Member b = new Member(11L, "b");
+
+            em.persist(a);
+            em.persist(b);
+
+            System.out.println("==========");
+
+            trx.commit();
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
 }
