@@ -19,7 +19,7 @@ public class MemberTest {
         trx.begin();
         try {
             Member member = new Member();
-            member.setId(4L);
+            member.setId(1L);
             member.setName("hello111");
             em.persist(member);
 
