@@ -18,10 +18,24 @@ public class MemberTest {
         EntityTransaction trx = em.getTransaction();
         trx.begin();
         try {
+            Team team = new Team();
+            team.setName("teamA");
+            em.persist(team);
+
             Member member = new Member();
-            member.setId(1L);
-            member.setName("hello111");
+            member.setUsername("member1");
+            member.setTeam(team);
             em.persist(member);
+
+            em.flush();
+            em.clear();
+
+            Member memberFound = em.find(Member.class, member.getId());
+            List<Member> members = memberFound.getTeam().getMembers();
+
+            for (Member mem : members) {
+                System.out.println("member = " + mem.getUsername());
+            }
 
             trx.commit();
         } catch (Exception e) {
@@ -38,7 +52,7 @@ public class MemberTest {
         trx.begin();
         try {
             Member member = em.find(Member.class, 4L);
-            member.setName("hello4");
+            member.setUsername("hello4");
             em.persist(member);
 
             trx.commit();
@@ -72,7 +86,7 @@ public class MemberTest {
         // based on Member object
         List<Member> members = em.createQuery("select m from Member as m", Member.class).getResultList();
         for (Member member : members) {
-            System.out.println(member.getName());
+            System.out.println(member.getUsername());
         }
     }
 
@@ -83,10 +97,10 @@ public class MemberTest {
         try {
             //from db
             Member member1 = em.find(Member.class, 4L);
-            System.out.println(member1.getName());
+            System.out.println(member1.getUsername());
             //from cache
             Member member2 = em.find(Member.class, 4L);
-            System.out.println(member2.getName());
+            System.out.println(member2.getUsername());
             //true
             System.out.println(member1 == member2);
         } catch (Exception e) {
@@ -96,27 +110,4 @@ public class MemberTest {
         }
         emf.close();
     }
-
-    @Test
-    public void writeBehindTest() {
-        EntityTransaction trx = em.getTransaction();
-        trx.begin();
-        try {
-            Member a = new Member(10L, "a");
-            Member b = new Member(11L, "b");
-
-            em.persist(a);
-            em.persist(b);
-
-            System.out.println("==========");
-
-            trx.commit();
-        } catch (Exception e) {
-            trx.rollback();
-        } finally {
-            em.close();
-        }
-        emf.close();
-    }
-
 }
