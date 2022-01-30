@@ -1,3 +1,4 @@
+/*
 package start;
 
 import lombok.AllArgsConstructor;
@@ -26,3 +27,4 @@ public class Team {
     private List<Member> members = new ArrayList<>();
 
 }
+*/

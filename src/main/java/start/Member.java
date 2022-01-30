@@ -1,3 +1,4 @@
+/*
 package start;
 
 import lombok.AllArgsConstructor;
@@ -29,3 +30,4 @@ public class Member {
     @JoinColumn(name = "team_id")
     private Team team;
 }
+*/

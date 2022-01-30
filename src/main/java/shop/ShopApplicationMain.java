@@ -1,6 +1,6 @@
-package start;
+package shop;
 
-public class StartJpaMain {
+public class ShopApplicationMain {
 
     public static void main(String[] args) {
 
