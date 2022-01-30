@@ -1,5 +1,6 @@
 package join.domain;
 
+import join.BaseEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,8 +16,8 @@ import javax.persistence.InheritanceType;
 @Setter
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
-@DiscriminatorColumn(name = "product_type")
-public class HotTracks {
+@DiscriminatorColumn
+public abstract class HotTracks extends BaseEntity {
 
     @Id
     @GeneratedValue
@@ -24,4 +25,6 @@ public class HotTracks {
     private Long id;
     private String name;
     private int price;
+    @Column(name = "stock_quantity")
+    private int stockQuantity;
 }

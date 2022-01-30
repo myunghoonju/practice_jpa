@@ -11,4 +11,5 @@ import javax.persistence.Entity;
 public class Album extends HotTracks {
 
     private String artist;
+    private String etc;
 }
