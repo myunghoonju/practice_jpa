@@ -1,13 +1,14 @@
 package join.domain;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
-
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityTransaction;
 import javax.persistence.Persistence;
 import java.time.LocalDateTime;
 
+@Slf4j
 public class HotTracksTest {
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("startJpa");
     private static final EntityManager em = emf.createEntityManager();
@@ -45,13 +46,13 @@ public class HotTracksTest {
 */
 
 
-            System.out.println("" + (realObj instanceof Movie));
-            System.out.println("" + (realObj.getClass() == Movie.class));
-            System.out.println("" + (reference instanceof Movie));
-            System.out.println("" + realObj.getClass());
-            System.out.println("" + reference.getClass());
-            System.out.println("" + (reference.getClass() == Movie.class));
-            System.out.println("" + (reference.getClass() == realObj.getClass()));
+            log.info("realObj instanceof Movie :: {}", realObj instanceof Movie);
+            log.info("realObj.getClass() == Movie.class :: {}" , realObj.getClass() == Movie.class);
+            log.info("reference instanceof Movie :: {}", (reference instanceof Movie));
+            log.info("realObj.getClass() :: {}", realObj.getClass());
+            log.info("reference.getClass() :: {}", reference.getClass());
+            log.info("reference.getClass() == Movie.class :: {}", (reference.getClass() == Movie.class));
+            log.info("reference.getClass() == realObj.getClass() :: {}", (reference.getClass() == realObj.getClass()));
 
             trx.commit();
         } catch (Exception e) {
