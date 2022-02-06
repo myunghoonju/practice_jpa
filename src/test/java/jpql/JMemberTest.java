@@ -120,6 +120,123 @@ public class JMemberTest {
     }
 
     @Test
+    public void fetchJoinTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
+            JTeam jTeamA = new JTeam();
+            jTeamA.setName("jTeamA");
+            em.persist(jTeamA);
+
+            JTeam jTeamB = new JTeam();
+            jTeamB.setName("jTeamB");
+            em.persist(jTeamB);
+
+            JMember jMember1 = new JMember();
+            jMember1.setUsername("jMember1");
+            jMember1.setAge(10);
+            jMember1.changeTeam(jTeamA);
+            em.persist(jMember1);
+
+            JMember jMember2 = new JMember();
+            jMember2.setUsername("jMember2");
+            jMember2.setAge(20);
+            jMember2.changeTeam(jTeamA);
+            em.persist(jMember2);
+
+            JMember jMember3 = new JMember();
+            jMember3.setUsername("jMember3");
+            jMember3.setAge(30);
+            jMember3.changeTeam(jTeamB);
+            em.persist(jMember3);
+
+            em.flush();
+            em.clear();
+
+/*
+            //fetch join
+            String query = "select m from JMember as m"; // N + 1 prob
+            String fetchQuery = "select m from JMember as m join fetch m.team";  // no lazy loading
+            String joinQuery = "select m from JMember as m join m.team";  // not getting team at this moment.
+
+            List<JMember> result = em.createQuery(query, JMember.class).getResultList();
+
+            for (JMember m : result) {
+                log.info("userName {} teamName {}", m.getUsername(), m.getTeam().getName());
+            }
+*/
+
+            //collection fetch
+            // one to many fetch join query can cause duplicated result
+            String collectionQuery = "select t from JTeam as t join fetch t.members";
+            // remove with team identifier
+            String noDupQuery = "select distinct t from JTeam as t join fetch t.members";
+
+            List<JTeam> collectionResult = em.createQuery(noDupQuery, JTeam.class).getResultList();
+
+            for (JTeam t : collectionResult) {
+                log.info("teamName {} member size {}", t.getName(), t.getMembers().size());
+            }
+
+            trx.commit();
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
+    @Test
+    public void fetchJoinLimitTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
+            JTeam jTeamA = new JTeam();
+            jTeamA.setName("jTeamA");
+            em.persist(jTeamA);
+
+            JTeam jTeamB = new JTeam();
+            jTeamB.setName("jTeamB");
+            em.persist(jTeamB);
+
+            JMember jMember1 = new JMember();
+            jMember1.setUsername("jMember1");
+            jMember1.setAge(10);
+            jMember1.changeTeam(jTeamA);
+            em.persist(jMember1);
+
+            JMember jMember2 = new JMember();
+            jMember2.setUsername("jMember2");
+            jMember2.setAge(20);
+            jMember2.changeTeam(jTeamA);
+            em.persist(jMember2);
+
+            JMember jMember3 = new JMember();
+            jMember3.setUsername("jMember3");
+            jMember3.setAge(30);
+            jMember3.changeTeam(jTeamB);
+            em.persist(jMember3);
+
+            em.flush();
+            em.clear();
+
+            // recommendation:: do not assign alias when you want to use join fetch.
+            // object graph can search every object ideally.
+            String badQuery = "select t from JTeam as t join fetch t.members as m where m.username ..."; // X
+
+            trx.commit();
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
+
+
+    @Test
     public void testForm() {
         EntityTransaction trx = em.getTransaction();
         trx.begin();
