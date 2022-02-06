@@ -9,10 +9,13 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.NamedQuery;
 
 @Getter
 @Setter
 @Entity
+@NamedQuery(name = "JMember.findByUsername",
+            query = "select m from JMember as m where m.username = :username")
 public class JMember {
 
     @Id

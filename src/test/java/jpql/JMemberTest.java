@@ -1,6 +1,7 @@
 package jpql;
 
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Before;
 import org.junit.Test;
 
 import javax.persistence.EntityManager;
@@ -14,6 +15,36 @@ import java.util.List;
 public class JMemberTest {
     private static final EntityManagerFactory emf = Persistence.createEntityManagerFactory("startJpa");
     private static final EntityManager em = emf.createEntityManager();
+
+    @Before
+    public void setData() {
+        JTeam jTeamA = new JTeam();
+        jTeamA.setName("jTeamA");
+        em.persist(jTeamA);
+
+        JTeam jTeamB = new JTeam();
+        jTeamB.setName("jTeamB");
+        em.persist(jTeamB);
+
+        JMember jMember1 = new JMember();
+        jMember1.setUsername("jMember1");
+        jMember1.setAge(10);
+        jMember1.changeTeam(jTeamA);
+        em.persist(jMember1);
+
+        JMember jMember2 = new JMember();
+        jMember2.setUsername("jMember2");
+        jMember2.setAge(20);
+        jMember2.changeTeam(jTeamA);
+        em.persist(jMember2);
+
+        JMember jMember3 = new JMember();
+        jMember3.setUsername("jMember3");
+        jMember3.setAge(30);
+        jMember3.changeTeam(jTeamB);
+        em.persist(jMember3);
+    }
+
 
     @Test
     public void memberTest() {
@@ -94,16 +125,6 @@ public class JMemberTest {
         EntityTransaction trx = em.getTransaction();
         trx.begin();
         try {
-            JTeam jTeam = new JTeam();
-            jTeam.setName("jTeamA");
-            em.persist(jTeam);
-
-            JMember jMember = new JMember();
-            jMember.setUsername("jMember");
-            jMember.setAge(10);
-            jMember.changeTeam(jTeam);
-            em.persist(jMember);
-
             em.flush();
             em.clear();
             String query = "select jm from JMember as jm inner join jm.team jt";
@@ -124,32 +145,6 @@ public class JMemberTest {
         EntityTransaction trx = em.getTransaction();
         trx.begin();
         try {
-            JTeam jTeamA = new JTeam();
-            jTeamA.setName("jTeamA");
-            em.persist(jTeamA);
-
-            JTeam jTeamB = new JTeam();
-            jTeamB.setName("jTeamB");
-            em.persist(jTeamB);
-
-            JMember jMember1 = new JMember();
-            jMember1.setUsername("jMember1");
-            jMember1.setAge(10);
-            jMember1.changeTeam(jTeamA);
-            em.persist(jMember1);
-
-            JMember jMember2 = new JMember();
-            jMember2.setUsername("jMember2");
-            jMember2.setAge(20);
-            jMember2.changeTeam(jTeamA);
-            em.persist(jMember2);
-
-            JMember jMember3 = new JMember();
-            jMember3.setUsername("jMember3");
-            jMember3.setAge(30);
-            jMember3.changeTeam(jTeamB);
-            em.persist(jMember3);
-
             em.flush();
             em.clear();
 
@@ -192,6 +187,54 @@ public class JMemberTest {
         EntityTransaction trx = em.getTransaction();
         trx.begin();
         try {
+            em.flush();
+            em.clear();
+
+            // recommendation:: do not assign alias when you want to use join fetch.
+            // object graph can search every object ideally.
+            String badQuery = "select t from JTeam as t join fetch t.members as m where m.username ..."; // X
+
+            trx.commit();
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
+
+    @Test
+    public void namedQueryTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
+            em.flush();
+            em.clear();
+
+            List<JMember> resultList = em.createNamedQuery("JMember.findByUsername", JMember.class)
+                    .setParameter("username", "jMember1")
+                    .getResultList();
+
+            for (JMember m : resultList) {
+                log.info("username {}", m.getUsername());
+            }
+
+            trx.commit();
+        } catch (Exception e) {
+            trx.rollback();
+        } finally {
+            em.close();
+        }
+        emf.close();
+    }
+
+
+    @Test
+    public void bulkTest() {
+        EntityTransaction trx = em.getTransaction();
+        trx.begin();
+        try {
             JTeam jTeamA = new JTeam();
             jTeamA.setName("jTeamA");
             em.persist(jTeamA);
@@ -218,12 +261,15 @@ public class JMemberTest {
             jMember3.changeTeam(jTeamB);
             em.persist(jMember3);
 
-            em.flush();
-            em.clear();
+            int count = em.createQuery("update JMember as m set m.age = 20").executeUpdate();
+            JMember jMember = em.find(JMember.class, jMember1.getId());
 
-            // recommendation:: do not assign alias when you want to use join fetch.
-            // object graph can search every object ideally.
-            String badQuery = "select t from JTeam as t join fetch t.members as m where m.username ..."; // X
+            log.info("persistence context => age {} ",jMember.getAge());
+
+            em.clear();
+            JMember newJMember = em.find(JMember.class, jMember1.getId());
+            log.info("new persistence context => age {} ",newJMember.getAge());
+
 
             trx.commit();
         } catch (Exception e) {
@@ -233,8 +279,6 @@ public class JMemberTest {
         }
         emf.close();
     }
-
-
 
     @Test
     public void testForm() {
